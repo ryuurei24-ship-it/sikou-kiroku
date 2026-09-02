@@ -1,0 +1,37 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  const questions = await getCollection('questions', ({ data }) => !data.draft);
+  return questions.map((q) => ({
+    params: { slug: q.id },
+    props: { question: q },
+  }));
+}
+
+const { question } = Astro.props;
+const { Content } = await render(question);
+---
+
+<Layout title={question.data.title}>
+  <article>
+    <h1>{question.data.title}</h1>
+    <p class="meta">
+      最終更新: {question.data.updated.toLocaleDateString('ja-JP')}
+      （最初に立てた日: {question.data.created.toLocaleDateString('ja-JP')}）
+    </p>
+    {
+      question.data.topics.length > 0 && (
+        <p class="meta topics">
+          {question.data.topics.map((t) => (
+            <a href={`/topics/${encodeURIComponent(t)}/`}>#{t}</a>
+          ))}
+        </p>
+      )
+    }
+    <div class="content">
+      <Content />
+    </div>
+  </article>
+</Layout>
