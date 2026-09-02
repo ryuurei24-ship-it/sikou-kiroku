@@ -1,0 +1,83 @@
+---
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <header>
+      <a href="/" class="site-title">問いの記録</a>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <style is:global>
+      :root {
+        color-scheme: light;
+      }
+      body {
+        font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 4rem;
+        line-height: 1.85;
+        color: #222;
+        background: #fdfdfb;
+      }
+      header {
+        margin-bottom: 3rem;
+      }
+      .site-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #222;
+        text-decoration: none;
+      }
+      h1 {
+        font-size: 1.6rem;
+        line-height: 1.5;
+        margin-bottom: 0.5rem;
+      }
+      a {
+        color: #1a5276;
+      }
+      time {
+        display: block;
+        font-size: 0.85rem;
+        color: #777;
+        margin-bottom: 2rem;
+      }
+      .post-list {
+        list-style: none;
+        padding: 0;
+      }
+      .post-list li {
+        margin-bottom: 1.5rem;
+      }
+      .post-list a {
+        font-size: 1.05rem;
+        text-decoration: none;
+      }
+      .post-list a:hover {
+        text-decoration: underline;
+      }
+      .post-list time {
+        display: inline;
+        margin-left: 0.75rem;
+      }
+      article .content h2 {
+        margin-top: 2.5rem;
+      }
+      article .content p {
+        margin: 1.1em 0;
+      }
+    </style>
+  </body>
+</html>
