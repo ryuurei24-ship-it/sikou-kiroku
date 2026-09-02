@@ -2,23 +2,43 @@
 import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 
-const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+const questions = (await getCollection('questions', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.updated.valueOf() - a.data.updated.valueOf()
 );
+
+const topicsSet = new Set<string>();
+questions.forEach((q) => q.data.topics.forEach((t) => topicsSet.add(t)));
+const topics = Array.from(topicsSet).sort();
 ---
 
 <Layout title="問いの記録">
   <h1>問いの記録</h1>
+
   <ul class="post-list">
     {
-      posts.map((post) => (
+      questions.map((q) => (
         <li>
-          <a href={`/posts/${post.id}/`}>{post.data.title}</a>
-          <time datetime={post.data.date.toISOString()}>
-            {post.data.date.toLocaleDateString('ja-JP')}
+          <a href={`/questions/${q.id}/`}>{q.data.title}</a>
+          <time datetime={q.data.updated.toISOString()}>
+            {q.data.updated.toLocaleDateString('ja-JP')}
           </time>
         </li>
       ))
     }
   </ul>
+
+  {
+    topics.length > 0 && (
+      <>
+        <h2>考えているテーマ</h2>
+        <ul class="topic-list">
+          {topics.map((t) => (
+            <li>
+              <a href={`/topics/${encodeURIComponent(t)}/`}>{t}</a>
+            </li>
+          ))}
+        </ul>
+      </>
+    )
+  }
 </Layout>
