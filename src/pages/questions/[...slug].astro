@@ -31,6 +31,20 @@ const { Content } = await render(question);
         </p>
       )
     }
+    {
+      question.data.sources.length > 0 && (
+        <div class="sources">
+          <p class="meta">参照</p>
+          <ul>
+            {question.data.sources.map((s) => (
+              <li>
+                <a href={s.url}>{s.title}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
     <div class="content">
       <Content />
     </div>
