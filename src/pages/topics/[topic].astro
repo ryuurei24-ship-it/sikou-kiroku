@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+import { withBase } from '../../lib/url';
 
 export async function getStaticPaths() {
   const questions = await getCollection('questions', ({ data }) => !data.draft);
@@ -20,13 +21,13 @@ const questions = (
 ---
 
 <Layout title={`テーマ: ${topic}`}>
-  <p><a href="/">← 問いの記録トップへ</a></p>
+  <p><a href={withBase('/')}>← 問いの記録トップへ</a></p>
   <h1>{topic}</h1>
   <ul class="post-list">
     {
       questions.map((q) => (
         <li>
-          <a href={`/questions/${q.id}/`}>{q.data.title}</a>
+          <a href={withBase(`questions/${q.id}/`)}>{q.data.title}</a>
           <time datetime={q.data.updated.toISOString()}>
             {q.data.updated.toLocaleDateString('ja-JP')}
           </time>
