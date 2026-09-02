@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+import { withBase } from '../../lib/url';
 
 export async function getStaticPaths() {
   const questions = await getCollection('questions', ({ data }) => !data.draft);
@@ -25,7 +26,7 @@ const { Content } = await render(question);
       question.data.topics.length > 0 && (
         <p class="meta topics">
           {question.data.topics.map((t) => (
-            <a href={`/topics/${encodeURIComponent(t)}/`}>#{t}</a>
+            <a href={withBase(`topics/${encodeURIComponent(t)}/`)}>#{t}</a>
           ))}
         </p>
       )
