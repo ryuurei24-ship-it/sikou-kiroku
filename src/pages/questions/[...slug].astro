@@ -17,6 +17,7 @@ const { Content } = await render(question);
 
 <Layout title={question.data.title}>
   <article>
+    <p><a href={withBase('/')}>← 問いの記録トップへ</a></p>
     <h1>{question.data.title}</h1>
     <p class="meta">
       最終更新: {question.data.updated.toLocaleDateString('ja-JP')}
