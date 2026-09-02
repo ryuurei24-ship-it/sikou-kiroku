@@ -1,4 +1,6 @@
 ---
+import { withBase } from '../lib/url';
+
 interface Props {
   title: string;
 }
@@ -13,7 +15,7 @@ const { title } = Astro.props;
   </head>
   <body>
     <header>
-      <a href="/" class="site-title">問いの記録</a>
+      <a href={withBase('/')} class="site-title">問いの記録</a>
     </header>
     <main>
       <slot />
