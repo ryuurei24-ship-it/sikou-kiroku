@@ -1,3 +1,50 @@
+# 思考記録（sikou-kiroku）
+
+公開サイト: https://ryuurei24-ship-it.github.io/sikou-kiroku/
+
+GitHubのWeb画面だけで、記事の追加と更新ができる。
+
+## 新しい問いを追加する
+
+1. このリポジトリを開き、`src` → `content` → `questions` と進む
+2. 右上の「Add file」→「Create new file」を押す
+3. ファイル名を入力する。形式は `テーマの英語名-番号.md`（例: `rule-of-law-1.md`）。同じテーマで2つ目の問いなら `rule-of-law-2.md`
+4. 下のテンプレートをコピーして貼り付け、中身を書き換える
+5. 右上の「Commit changes...」→「Commit changes」を押す（mainに直接コミット）
+6. 「Actions」タブで、緑のチェックが付くまで待つ（反映の完了）
+
+## 既存の問いを更新する
+
+1. `src/content/questions/` の中から対象のファイルを開く
+2. 右上の鉛筆アイコン（Edit）を押す
+3. 「問いの検討」に追記し、冒頭の `updated:` を今日の日付に直す
+4. 「Commit changes...」→「Commit changes」を押す
+5. 「Actions」タブで緑のチェックを確認する
+
+## テンプレート
+
+```markdown
+---
+title: 問いのタイトル
+topics:
+  - トピック名
+created: 2026-00-00
+updated: 2026-00-00
+sources:
+  - title: 記事のタイトル
+    url: https://example.com/
+---
+
+### 記事の要約
+
+### 記事から生じた問い
+
+### 問いの検討
+```
+---
+
+以前のREADMEになる。記録として残しておく。
+
 # 問いの記録
 
 Astro + GitHub Pages で運用する、問いと思考の途中経過を記録するブログ。
