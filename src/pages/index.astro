@@ -15,6 +15,22 @@ const topics = Array.from(topicsSet).sort();
 <Layout title="トップページ">
   <h1>問いの記録</h1>
 
+  {
+    topics.length > 0 && (
+      <>
+        <h3>考えているテーマ</h3>
+        <ul class="topic-list">
+          {topics.map((t) => (
+            <li>
+              <a href={withBase(`topics/${encodeURIComponent(t)}/`)}>{t}</a>
+            </li>
+          ))}
+        </ul>
+      </>
+    )
+  }
+
+  <h3>最近の問い</h3>
   <ul class="post-list">
     {
       questions.map((q) => (
@@ -27,19 +43,4 @@ const topics = Array.from(topicsSet).sort();
       ))
     }
   </ul>
-
-  {
-    topics.length > 0 && (
-      <>
-        <h2>考えているテーマ</h2>
-        <ul class="topic-list">
-          {topics.map((t) => (
-            <li>
-              <a href={withBase(`topics/${encodeURIComponent(t)}/`)}>{t}</a>
-            </li>
-          ))}
-        </ul>
-      </>
-    )
-  }
 </Layout>
