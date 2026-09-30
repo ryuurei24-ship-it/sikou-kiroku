@@ -1,10 +1,28 @@
 ---
+import { getCollection } from 'astro:content';
 import { withBase } from '../lib/url';
 
 interface Props {
   title: string;
 }
 const { title } = Astro.props;
+
+// 目次用データ：問いをテーマごとにまとめる
+const questions = (await getCollection('questions', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.updated.valueOf() - a.data.updated.valueOf()
+);
+const topicNames = Array.from(new Set(questions.flatMap((q) => q.data.topics))).sort();
+const groups = topicNames.map((name) => ({
+  name,
+  href: withBase(`topics/${encodeURIComponent(name)}/`),
+  items: questions.filter((q) => q.data.topics.includes(name)),
+}));
+const untagged = questions.filter((q) => q.data.topics.length === 0);
+
+// 現在地の判定（ベースパスに依存しないよう末尾で比較）
+const current = decodeURI(Astro.url.pathname).replace(/\/$/, '');
+const isQuestion = (id: string) => current.endsWith(`/questions/${id}`);
+const isTopic = (name: string) => current.endsWith(`/topics/${name}`);
 ---
 <!doctype html>
 <html lang="ja">
@@ -19,13 +37,58 @@ const { title } = Astro.props;
         <header>
           <a href={withBase('/')} class="site-title">流麗の思考記録</a>
         </header>
-        <div class="page">
-          <main>
-            <slot />
-          </main>
+
+        <div class="body">
+          <nav class="toc" aria-label="目次">
+            <details>
+              <summary>目次</summary>
+              <a class="toc-home" href={withBase('/')}>表紙（トップ）</a>
+
+              {groups.map((g) => (
+                <section class="toc-group">
+                  <p class={`toc-topic${isTopic(g.name) ? ' current' : ''}`}>
+                    <a href={g.href}>{g.name}</a>
+                  </p>
+                  <ul>
+                    {g.items.map((q) => (
+                      <li class={isQuestion(q.id) ? 'current' : ''}>
+                        <a href={withBase(`questions/${q.id}/`)}>{q.data.title}</a>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
+
+              {untagged.length > 0 && (
+                <section class="toc-group">
+                  <p class="toc-topic"><span>テーマ未設定</span></p>
+                  <ul>
+                    {untagged.map((q) => (
+                      <li class={isQuestion(q.id) ? 'current' : ''}>
+                        <a href={withBase(`questions/${q.id}/`)}>{q.data.title}</a>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+            </details>
+          </nav>
+
+          <div class="page">
+            <main>
+              <slot />
+            </main>
+          </div>
         </div>
       </div>
     </div>
+
+    <script is:inline>
+      // PCでは目次を最初から開く。スマホでは閉じたまま
+      var d = document.querySelector('.toc details');
+      if (d && window.matchMedia('(min-width: 801px)').matches) d.open = true;
+    </script>
+
     <style is:global>
       :root {
         color-scheme: light;
@@ -46,13 +109,13 @@ const { title } = Astro.props;
         padding: 1.5rem 1rem 4rem;
       }
       .notebook {
-        max-width: 760px;
+        max-width: 1040px;
         margin: 0 auto;
       }
 
       /* ノートの見出しタブ（ヘッダー） */
       header {
-        margin: 0 0 0 2.5rem;
+        margin: 0 0 0 1rem;
       }
       .site-title {
         display: inline-block;
@@ -66,13 +129,86 @@ const { title } = Astro.props;
         text-decoration: none;
       }
 
+      /* 目次 + ページの2カラム */
+      .body {
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: 0;
+        align-items: start;
+      }
+
+      /* 目次 */
+      .toc {
+        position: sticky;
+        top: 1rem;
+        max-height: calc(100vh - 2rem);
+        overflow-y: auto;
+        background: #f3efe4;
+        border-radius: 6px 0 0 6px;
+        padding: 1.25rem 0.9rem 1.5rem 1.1rem;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+      }
+      .toc summary {
+        font-weight: 700;
+        font-size: 0.8rem;
+        letter-spacing: 0.15em;
+        color: #6b665a;
+        cursor: pointer;
+        list-style: none;
+        margin-bottom: 0.75rem;
+      }
+      .toc summary::-webkit-details-marker {
+        display: none;
+      }
+      .toc a {
+        color: var(--ink);
+        text-decoration: none;
+      }
+      .toc a:hover {
+        text-decoration: underline;
+      }
+      .toc-home {
+        display: block;
+        margin-bottom: 1rem;
+      }
+      .toc-group {
+        margin-bottom: 1.1rem;
+      }
+      .toc-topic {
+        margin: 0 0 0.3rem;
+        padding-left: 0.6rem;
+        border-left: 4px solid var(--accent);
+        font-weight: 700;
+      }
+      .toc-topic.current a {
+        color: var(--accent);
+        text-decoration: underline;
+      }
+      .toc ul {
+        list-style: none;
+        margin: 0;
+        padding: 0 0 0 0.6rem;
+      }
+      .toc li {
+        margin: 0.25rem 0;
+        padding: 0.1rem 0.5rem;
+        border-radius: 3px;
+      }
+      .toc li.current {
+        background: #f6ecc6;
+        font-weight: 700;
+      }
+
       /* 紙のページ */
       .page {
         position: relative;
         background: var(--paper);
         border-radius: 2px 6px 6px 2px;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.08);
-        padding: 2.5rem 2rem 3.5rem 4.25rem;
+        padding: 2.5rem 2rem 3.5rem 3.6rem;
+        min-height: 60vh;
       }
       /* 余白の赤線 */
       .page::before {
@@ -80,20 +216,9 @@ const { title } = Astro.props;
         position: absolute;
         top: 0;
         bottom: 0;
-        left: 3.2rem;
+        left: 2.6rem;
         width: 1px;
         background: var(--margin-line);
-      }
-      /* 綴じ穴 */
-      .page::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0.9rem;
-        width: 0.9rem;
-        background: radial-gradient(circle at center, var(--desk) 0 0.35rem, transparent 0.36rem) 0 0 / 0.9rem 6rem repeat-y;
-        pointer-events: none;
       }
 
       h1 {
@@ -127,7 +252,6 @@ const { title } = Astro.props;
         margin-bottom: 2rem;
       }
 
-      /* 目次（問いの一覧） */
       .post-list {
         list-style: none;
         padding: 0;
@@ -173,7 +297,6 @@ const { title } = Astro.props;
         padding-left: 1.2rem;
       }
 
-      /* テーマ一覧：しおり風のタグ */
       .topic-list {
         list-style: none;
         padding: 0;
@@ -194,21 +317,32 @@ const { title } = Astro.props;
         background: #d5e1ea;
       }
 
-      @media (max-width: 600px) {
+      /* スマホ：目次をページ上部の折りたたみにする */
+      @media (max-width: 800px) {
         .desk {
           padding: 0.75rem 0.5rem 3rem;
         }
-        header {
-          margin-left: 1.25rem;
+        .body {
+          grid-template-columns: 1fr;
+        }
+        .toc {
+          position: static;
+          max-height: none;
+          border-radius: 6px 6px 0 0;
+          padding: 0.8rem 1rem;
+        }
+        .toc summary {
+          margin-bottom: 0;
+        }
+        .toc details[open] summary {
+          margin-bottom: 0.75rem;
         }
         .page {
-          padding: 1.75rem 1.1rem 2.5rem 2.6rem;
+          padding: 1.75rem 1.1rem 2.5rem 2.4rem;
+          border-radius: 0 0 6px 6px;
         }
         .page::before {
-          left: 1.9rem;
-        }
-        .page::after {
-          display: none;
+          left: 1.7rem;
         }
       }
     </style>
